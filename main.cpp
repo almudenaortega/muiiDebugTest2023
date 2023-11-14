@@ -59,10 +59,10 @@ int main() {
 // Esta función calcula el valor RMS
 float calcularRMS(uint16_t *datos, int longitud) {
   float rms = 0;
-  float datoV;
+  
   for (int i = 0; i < longitud; i++) {
-    datoV = (((float)datos[i]) / 65536 * 800.0) - 400.0;
-    rms += pow(datoV, 2);
+    float datoV = (((float)datos[i]) / 65536 * 800.0) - 400.0;
+    rms += datoV * datoV;
   }
   rms = sqrt(rms / longitud);
   return rms;
@@ -70,23 +70,18 @@ float calcularRMS(uint16_t *datos, int longitud) {
 
 void calcularDatos(uint16_t *datosV, uint16_t *datosI, int longitud,
                    estructuraMedidas *medidas) {
-  float Vrms = 0;
-  float datoV;
+  int Vrms = 0;
+  float datoV; 
   float Irms = 0;
   float datoI;
   float P = 0;
   float S, Q, FA, E;
   for (int i = 0; i < longitud; i++) {
     datoV = (((float)datosV[i]) / 65536 * 800.0) - 400.0;
-    Vrms += pow(datoV, 2);
-  }
-  for (int i = 0; i < longitud; i++) {
     datoI = (((float)datosI[i]) / 65536 * 5.0) - 2.5;
-    Irms += pow(datoI, 2);
-  }
-  for (int i = 0; i < longitud; i++) {
-    datoV = (((float)datosV[i]) / 65536 * 800.0) - 400.0;
-    datoI = (((float)datosI[i]) / 65536 * 5.0) - 2.5;
+
+    Vrms += datoV * datoV;
+    Irms += datoI * datoI;
     P += datoV * datoI;
   }
 
@@ -94,7 +89,7 @@ void calcularDatos(uint16_t *datosV, uint16_t *datosI, int longitud,
   Irms = sqrt(Irms / longitud);
   P = P / longitud;
   S = Vrms * Irms;
-  Q = sqrt(pow(S, 2) - pow(P, 2));
+  Q = sqrt(S*S - P*P);
   FA = P / S;
   E = P/fs*longitudTrama/60/60/1000;
   medidas->vrms = Vrms;
